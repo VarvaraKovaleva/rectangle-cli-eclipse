@@ -1,18 +1,22 @@
 package ru.oivt.rectanglecli;
 
-import ru.oivt.rectanglecli.model.Rectangle;
+import ru.oivt.rectanglecli.util.InputUtils;
+import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
-        // Создаем прямоугольник 10 на 5
-        Rectangle r = new Rectangle(10, 5);
+        Scanner sc = new Scanner(System.in);
+        System.out.println("--- Тест InputUtils ---");
         
-        System.out.println("Периметр должен быть 30: " + r.perimeter());
-        System.out.println("Площадь должна быть 50: " + r.area());
-        System.out.println("Диагональ (примерно 11.18): " + r.diagonal());
+        // Попробуй ввести: abc, потом -5, потом 3.5
+        double a = InputUtils.readPositiveDouble(sc, "Введите a: ");
+        System.out.println("Вы ввели: " + a);
         
-        // Проверка квадрата
-        Rectangle square = new Rectangle(4, 4);
-        System.out.println("Квадрат 4х4, радиус вписанной: " + square.inscribedCircleRadius());
+        // Попробуй ввести: abc, потом 5
+        int choice = InputUtils.readInt(sc, "Введите целое число: ");
+        System.out.println("Вы ввели: " + choice);
+
+        InputUtils.pause(sc);
+        System.out.println("Программа завершена.");
     }
 }
