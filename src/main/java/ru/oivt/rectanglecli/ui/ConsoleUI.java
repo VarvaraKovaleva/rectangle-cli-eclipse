@@ -19,21 +19,32 @@ public class ConsoleUI {
 
     public void run() {
         printHeader();
-        readParameters(); // Запрашиваем a и b, создаем Rectangle
-        
+        readParameters();
+
         boolean running = true;
         while (running) {
             printMenu();
-            
-            // Пока меню - заглушка, просто читаем выбор
+
             int choice = InputUtils.readInt(sc, "Ваш выбор: ");
-            
-            if (choice == 0) {
-                System.out.println("Выход...");
-                running = false;
-            } else {
-                System.out.println(">>> В разработке: выбран пункт " + choice + " <<<");
-                InputUtils.pause(sc);
+            System.out.println(); // Пустая строка для красоты
+
+            switch (choice) {
+                case 1:
+                    showPerimeter();
+                    InputUtils.pause(sc);
+                    break;
+                case 2:
+                    showArea();
+                    InputUtils.pause(sc);
+                    break;
+                case 7:
+                    System.out.println("Выход. До свидания!");
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Ошибка: неизвестный пункт меню (" + choice + ").");
+                    System.out.println("Повторите ввод.\n");
+                    break;
             }
         }
     }
@@ -53,15 +64,30 @@ public class ConsoleUI {
         System.out.println("========================================\n");
     }
 
-//Пока выводит только параметры и заглушку меню.
+//Меню
 
     private void printMenu() {
         System.out.println("----------------------------------------");
-        System.out.printf("Параметры: a = %.2f, b = %.2f%n", rectangle.getA(), rectangle.getB());
+        System.out.printf("Параметры прямоугольника: a = %.2f, b = %.2f%n",
+                rectangle.getA(), rectangle.getB());
         System.out.println("----------------------------------------");
-        System.out.println("1) Периметр (заглушка)");
-        System.out.println("2) Площадь (заглушка)");
-        System.out.println("0) Выход");
+        System.out.println("Выберите действие:");
+        System.out.println("1) Периметр P = 2(a + b)");
+        System.out.println("2) Площадь  S = a * b");
+        // Остальные пункты добавим на следующих шагах
+        System.out.println("7) Выход");
         System.out.println();
+    }
+    //Периметр
+    private void showPerimeter() {
+        System.out.println("Периметр:");
+        System.out.printf("P = 2(a + b) = 2(%.2f + %.2f) = %.2f%n",
+                rectangle.getA(), rectangle.getB(), rectangle.perimeter());
+    }
+//Площадь
+    private void showArea() {
+        System.out.println("Площадь:");
+        System.out.printf("S = a * b = %.2f * %.2f = %.2f%n",
+                rectangle.getA(), rectangle.getB(), rectangle.area());
     }
 }
