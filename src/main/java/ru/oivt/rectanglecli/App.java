@@ -1,22 +1,20 @@
 package ru.oivt.rectanglecli;
 
-import ru.oivt.rectanglecli.util.InputUtils;
+import ru.oivt.rectanglecli.ui.ConsoleUI;
 import java.util.Scanner;
 
 public class App {
     public static void main(String[] args) {
+        // Создаём Scanner для чтения из консоли
         Scanner sc = new Scanner(System.in);
-        System.out.println("--- Тест InputUtils ---");
         
-        // Попробуй ввести: abc, потом -5, потом 3.5
-        double a = InputUtils.readPositiveDouble(sc, "Введите a: ");
-        System.out.println("Вы ввели: " + a);
+        // Создаём UI, передавая ему Scanner
+        ConsoleUI ui = new ConsoleUI(sc);
         
-        // Попробуй ввести: abc, потом 5
-        int choice = InputUtils.readInt(sc, "Введите целое число: ");
-        System.out.println("Вы ввели: " + choice);
-
-        InputUtils.pause(sc);
-        System.out.println("Программа завершена.");
+        // Запускаем главный цикл
+        ui.run();
+        
+        // Закрываем Scanner
+        sc.close();
     }
 }

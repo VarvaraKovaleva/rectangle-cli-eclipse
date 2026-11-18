@@ -16,7 +16,6 @@ class RectangleTest {
     void testPerimeter() {
         Rectangle r = new Rectangle(10, 5);
         // assertEquals(ожидаемое, фактическое, погрешность)
-        // Погрешность 0.001 нужна, потому что double неточен
         assertEquals(30.0, r.perimeter(), 0.001);
     }
 
