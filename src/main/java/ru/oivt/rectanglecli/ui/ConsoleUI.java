@@ -15,7 +15,7 @@ public class ConsoleUI {
         this.sc = sc;
     }
 
-// Главный цикл приложения.
+//Главный цикл приложения: печать меню, чтение выбора пользователя, выполнение действия и возврат в меню    
 
     public void run() {
         printHeader();//Запрос параметров
@@ -64,7 +64,7 @@ public class ConsoleUI {
         }
     }
 
-//Запрашивает у пользователя параметры и создает объект Rectangle.
+//Запрашивает у пользователя параметры a и b и создаёт новый Rectangle
     private void readParameters() {
         System.out.println("Введите параметры прямоугольника:");
         double a = InputUtils.readPositiveDouble(sc, "  a (длина): ");
@@ -79,7 +79,7 @@ public class ConsoleUI {
         System.out.println("========================================\n");
     }
 
-//Меню
+//Выводит меню с параметрами прямоугольника
 
     private void printMenu() {
         System.out.println("----------------------------------------");
