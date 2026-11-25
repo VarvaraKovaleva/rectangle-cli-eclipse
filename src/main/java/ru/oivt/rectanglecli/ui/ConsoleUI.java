@@ -54,13 +54,25 @@ public class ConsoleUI {
                 case 6://Изменение параметров
                     readParameters(); // Запрашиваем a и b заново
                     break;
+                case 8://Историясесии
+                    history.print();
+                    InputUtils.pause(sc);
+                    break;
+                case 9://Помощь  
+                    showHelp();
+                    InputUtils.pause(sc);
+                    break;
+                case 10://О программе
+                    showAbout();
+                    InputUtils.pause(sc);
+                    break;
+                case 11://Очистка экрана
+                    clearScreen();
+                    // Паузу не делаем: очистка экрана сама по себе даёт «чистый» вид
+                    break; 
                 case 7://Выход
                     System.out.println("Выход. До свидания!");
                     running = false;
-                    break;
-                case 8:
-                    history.print();
-                    InputUtils.pause(sc);
                     break;
                 default:
                     System.out.println("Ошибка: неизвестный пункт меню (" + choice + ").");
@@ -100,6 +112,9 @@ public class ConsoleUI {
         System.out.println("5) Радиус вписанной окружности (только квадрат)");
         System.out.println("6) Ввести новые параметры");
         System.out.println("8) Показать историю");
+        System.out.println("9) Справка (help)");       
+        System.out.println("10) О программе (about)"); 
+        System.out.println("11) Очистить экран (clear)");
         System.out.println("7) Выход");
         System.out.println();
     }
@@ -155,5 +170,61 @@ public class ConsoleUI {
         System.out.printf("r = a / 2 = %.2f / 2 = %.2f%n", rectangle.getA(), r);
         history.add(String.format("Вписанная окружность (a=%.2f, b=%.2f): %.2f",
                 rectangle.getA(), rectangle.getB(), r));
+    }
+    
+    
+    /**
+     * Выводит справку по командам (аналог `man` / `--help` в Unix-утилитах).
+     */
+    private void showHelp() {
+        System.out.println("=== СПРАВКА ===");
+        System.out.println("Эта программа вычисляет характеристики прямоугольника.");
+        System.out.println();
+        System.out.println("Основные операции:");
+        System.out.println("  1 — периметр (P = 2(a + b))");
+        System.out.println("  2 — площадь (S = a * b)");
+        System.out.println("  3 — диагональ (d = √(a² + b²))");
+        System.out.println("  4 — длина описанной окружности (C = π·d)");
+        System.out.println("  5 — радиус вписанной окружности (только для квадрата)");
+        System.out.println("  6 — ввести новые параметры a и b");
+        System.out.println("  7 — выйти из программы");
+        System.out.println();
+        System.out.println("Дополнительные команды:");
+        System.out.println("  8  — показать историю вычислений");
+        System.out.println("  9  — эта справка");
+        System.out.println("  10 — информация о программе");
+        System.out.println("  11 — очистить экран");
+        System.out.println();
+        System.out.println("Совет: для расчёта квадрата введите a = b (например, 4 и 4).");
+    }
+    
+    /**
+     * Выводит информацию о программе: название, версия, автор, назначение.
+     * Аналог `--version` / `--about` в утилитах.
+     */
+    private void showAbout() {
+        System.out.println("=== О ПРОГРАММЕ ===");
+        System.out.println("Название: Rectangle CLI Calculator");
+        System.out.println("Версия:   2.0 (с доп. заданиями)");
+        System.out.println("Автор:    Ковалева Варвара");
+        System.out.println("Курс:     Java-разработка, учебный проект");
+        System.out.println();
+        System.out.println("Описание:");
+        System.out.println("  Консольный калькулятор для расчёта характеристик");
+        System.out.println("  прямоугольника. Поддерживает периметр, площадь,");
+        System.out.println("  диагональ, длины окружностей, историю вычислений.");
+        System.out.println();
+        System.out.println("Технологии: Java 17+, JUnit 5, Eclipse IDE.");
+    }
+    
+    /**
+     * Очищает экран консоли.
+     * Использует ANSI escape-коды: \033[H — курсор в начало, \033[2J — очистка.
+     */
+    private void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+        // Дополнительно прокрутить: на случай, если ANSI не сработал
+        for (int i = 0; i < 5; i++) System.out.println();
     }
 }
