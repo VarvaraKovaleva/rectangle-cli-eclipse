@@ -2,6 +2,7 @@ package ru.oivt.rectanglecli.ui;
 
 import ru.oivt.rectanglecli.model.Rectangle;
 import ru.oivt.rectanglecli.util.InputUtils;
+import ru.oivt.rectanglecli.util.HistoryManager;
 
 import java.util.Scanner;
 
@@ -10,6 +11,7 @@ import java.util.Scanner;
 public class ConsoleUI {
     private final Scanner sc;
     private Rectangle rectangle; // Храним текущий прямоугольник
+    private final HistoryManager history = new HistoryManager(); //История
 
     public ConsoleUI(Scanner sc) {
         this.sc = sc;
@@ -56,6 +58,10 @@ public class ConsoleUI {
                     System.out.println("Выход. До свидания!");
                     running = false;
                     break;
+                case 8:
+                    history.print();
+                    InputUtils.pause(sc);
+                    break;
                 default:
                     System.out.println("Ошибка: неизвестный пункт меню (" + choice + ").");
                     System.out.println("Повторите ввод.\n");
@@ -93,6 +99,7 @@ public class ConsoleUI {
         System.out.println("4) Длина описанной окружности C = π * d");
         System.out.println("5) Радиус вписанной окружности (только квадрат)");
         System.out.println("6) Ввести новые параметры");
+        System.out.println("8) Показать историю");
         System.out.println("7) Выход");
         System.out.println();
     }
@@ -105,12 +112,16 @@ public class ConsoleUI {
         // Выводим название, формулу, подстановку и результат (ТЗ, раздел 3.3)
         System.out.printf("P = 2(a + b) = 2(%.2f + %.2f) = %.2f%n",
                 rectangle.getA(), rectangle.getB(), rectangle.perimeter());
+        history.add(String.format("Периметр (a=%.2f, b=%.2f): %.2f",
+                rectangle.getA(), rectangle.getB(), rectangle.perimeter()));
     }
 
     private void showArea() {
         System.out.println("Площадь:");
         System.out.printf("S = a * b = %.2f * %.2f = %.2f%n",
                 rectangle.getA(), rectangle.getB(), rectangle.area());
+        history.add(String.format("Площадь (a=%.2f, b=%.2f): %.2f",
+                rectangle.getA(), rectangle.getB(), rectangle.area()));
     }
 
     private void showDiagonal() {
@@ -118,6 +129,8 @@ public class ConsoleUI {
         // Используем sqrt в тексте, чтобы было понятно, откуда формула
         System.out.printf("d = sqrt(a^2 + b^2) = sqrt(%.2f^2 + %.2f^2) = %.2f%n",
                 rectangle.getA(), rectangle.getB(), rectangle.diagonal());
+        history.add(String.format("Диагональ (a=%.2f, b=%.2f): %.2f",
+                rectangle.getA(), rectangle.getB(), rectangle.diagonal()));
     }
 
     private void showCircumscribedCircle() {
@@ -126,19 +139,21 @@ public class ConsoleUI {
         double c = Math.PI * rectangle.diagonal();
         System.out.printf("C = π * d = π * %.2f = %.2f%n",
                 rectangle.diagonal(), c);
+        history.add(String.format("Описанная окружность (a=%.2f, b=%.2f): %.2f",
+                rectangle.getA(), rectangle.getB(), c));
     }
 
     private void showInscribedCircle() {
-        System.out.println("Радиус вписанной окружности:");
-        
-        // только для квадрата, иначе — понятное сообщение
+    	// только для квадрата, иначе — понятное сообщение
+    	System.out.println("Радиус вписанной окружности:");
         if (!rectangle.isSquare()) {
             System.out.println("Вписанная окружность существует только для квадрата.");
             return; // Вышли из метода, пауза выполнится в run()
         }
-        
         // Для квадрата: r = a / 2
-        System.out.printf("r = a / 2 = %.2f / 2 = %.2f%n",
-                rectangle.getA(), rectangle.inscribedCircleRadius());
+        double r = rectangle.inscribedCircleRadius();
+        System.out.printf("r = a / 2 = %.2f / 2 = %.2f%n", rectangle.getA(), r);
+        history.add(String.format("Вписанная окружность (a=%.2f, b=%.2f): %.2f",
+                rectangle.getA(), rectangle.getB(), r));
     }
 }
