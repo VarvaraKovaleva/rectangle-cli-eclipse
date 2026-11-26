@@ -1,27 +1,38 @@
 package ru.oivt.rectanglecli.ui;
 
 import ru.oivt.rectanglecli.model.Rectangle;
+import ru.oivt.rectanglecli.model.Circle;
+import ru.oivt.rectanglecli.model.Triangle;
+import ru.oivt.rectanglecli.model.Shape;
 import ru.oivt.rectanglecli.util.InputUtils;
 import ru.oivt.rectanglecli.util.HistoryManager;
 
+
 import java.util.Scanner;
 
-//Управляющий класс UI. Отвечает за ввод/вывод, меню и цикл приложения.
+/**
+ * Главный класс пользовательского интерфейса (UI).
+ * Отвечает за ввод/вывод, меню и цикл приложения.
+ * 
+ * Работает с фигурами через интерфейс Shape (полиморфизм):
+ * конкретный тип (Rectangle, Circle, Triangle) выбирается в chooseShape().
+ */
 
 public class ConsoleUI {
     private final Scanner sc;
-    private Rectangle rectangle; // Храним текущий прямоугольник
+    private Shape currentShape; // Текущая фигура (может быть любого типа)
     private final HistoryManager history = new HistoryManager(); //История
 
     public ConsoleUI(Scanner sc) {
         this.sc = sc;
     }
+    
 
 //Главный цикл приложения: печать меню, чтение выбора пользователя, выполнение действия и возврат в меню    
 
     public void run() {
         printHeader();//Запрос параметров
-        readParameters();//Название калькулятора
+        chooseShape(); // Запрашиваем фигуру и её параметры при старте
 
         boolean running = true;
         while (running) {
@@ -52,7 +63,7 @@ public class ConsoleUI {
                     InputUtils.pause(sc);
                     break;
                 case 6://Изменение параметров
-                    readParameters(); // Запрашиваем a и b заново
+                	chooseShape(); // Ввод новых параметров или смена фигуры
                     break;
                 case 8://Историясесии
                     history.print();
@@ -81,15 +92,46 @@ public class ConsoleUI {
             }
         }
     }
+    
+    /**
+     * Запрашивает у пользователя тип фигуры и её параметры.
+     * Создаёт объект соответствующего класса и сохраняет в currentShape.
+     * 
+     * Квадрат реализован как Rectangle(a, a) — частный случай прямоугольника.
+     */
+    private void chooseShape() {
+        System.out.println("Выберите фигуру:");
+        System.out.println("1) Прямоугольник");
+        System.out.println("2) Квадрат");
+        System.out.println("3) Круг");
+        System.out.println("4) Треугольник (равносторонний)");
 
-//Запрашивает у пользователя параметры a и b и создаёт новый Rectangle
-    private void readParameters() {
-        System.out.println("Введите параметры прямоугольника:");
-        double a = InputUtils.readPositiveDouble(sc, "  a (длина): ");
-        double b = InputUtils.readPositiveDouble(sc, "  b (ширина): ");
-        this.rectangle = new Rectangle(a, b);
-        System.out.println("Прямоугольник создан!\n");
+        int type = InputUtils.readInt(sc, "Ваш выбор: ");
+        System.out.println();
+
+        switch (type) {
+            case 2: // Квадрат — прямоугольник с равными сторонами
+                double side = InputUtils.readPositiveDouble(sc, "Введите сторону квадрата a: ");
+                currentShape = new Rectangle(side, side);
+                break;
+            case 3: // Круг
+                double r = InputUtils.readPositiveDouble(sc, "Введите радиус круга r: ");
+                currentShape = new Circle(r);
+                break;
+            case 4: // Равносторонний треугольник
+                double tSide = InputUtils.readPositiveDouble(sc, "Введите сторону треугольника a: ");
+                currentShape = new Triangle(tSide);
+                break;
+            case 1: // Прямоугольник
+            default: // При любом другом вводе — безопасный дефолт
+                double a = InputUtils.readPositiveDouble(sc, "Введите длину прямоугольника a: ");
+                double b = InputUtils.readPositiveDouble(sc, "Введите ширину прямоугольника b: ");
+                currentShape = new Rectangle(a, b);
+                break;
+        }
+        System.out.println("Фигура создана!\n");
     }
+
 
     private void printHeader() {
         System.out.println("========================================");
@@ -97,134 +139,162 @@ public class ConsoleUI {
         System.out.println("========================================\n");
     }
 
-//Выводит меню с параметрами прямоугольника
 
+
+    /**
+     * Выводит текущие параметры фигуры и список доступных действий.
+     * Пункты 3, 4, 5 показываются только для прямоугольника (и квадрата),
+     * так как для круга и треугольника эти характеристики не определены.
+     */
     private void printMenu() {
         System.out.println("----------------------------------------");
-        System.out.printf("Параметры прямоугольника: a = %.2f, b = %.2f%n",
-                rectangle.getA(), rectangle.getB());
+        // Полиморфный вывод параметров: определяем тип через instanceof
+        if (currentShape instanceof Rectangle r) {
+            System.out.printf("Фигура: %s, a = %.2f, b = %.2f%n",
+                    r.getName(), r.getA(), r.getB());
+        } else if (currentShape instanceof Circle c) {
+            System.out.printf("Фигура: %s, r = %.2f%n", c.getName(), c.getRadius());
+        } else if (currentShape instanceof Triangle t) {
+            System.out.printf("Фигура: %s, a = %.2f%n", t.getName(), t.getSide());
+        }
+
         System.out.println("----------------------------------------");
         System.out.println("Выберите действие:");
-        System.out.println("1) Периметр P = 2(a + b)");
-        System.out.println("2) Площадь  S = a * b");
-        System.out.println("3) Диагональ d = sqrt(a^2 + b^2)");
-        System.out.println("4) Длина описанной окружности C = π * d");
-        System.out.println("5) Радиус вписанной окружности (только квадрат)");
+        System.out.println("1) Периметр");
+        System.out.println("2) Площадь");
+
+        // Пункты 3-5 доступны только для прямоугольника (включая квадрат)
+        if (currentShape instanceof Rectangle) {
+            System.out.println("3) Диагональ d = sqrt(a^2 + b^2)");
+            System.out.println("4) Длина описанной окружности C = π * d");
+            System.out.println("5) Радиус вписанной окружности (только квадрат)");
+        }
+
         System.out.println("6) Ввести новые параметры");
         System.out.println("8) Показать историю");
-        System.out.println("9) Справка (help)");       
-        System.out.println("10) О программе (about)"); 
+        System.out.println("9) Справка (help)");
+        System.out.println("10) О программе (about)");
         System.out.println("11) Очистить экран (clear)");
         System.out.println("7) Выход");
         System.out.println();
     }
-    
-    
-//Методы расчета
-    //Периметр
-    private void showPerimeter() {
-        System.out.println("Периметр:");
-        // Выводим название, формулу, подстановку и результат (ТЗ, раздел 3.3)
-        System.out.printf("P = 2(a + b) = 2(%.2f + %.2f) = %.2f%n",
-                rectangle.getA(), rectangle.getB(), rectangle.perimeter());
-        history.add(String.format("Периметр (a=%.2f, b=%.2f): %.2f",
-                rectangle.getA(), rectangle.getB(), rectangle.perimeter()));
-    }
 
-    private void showArea() {
-        System.out.println("Площадь:");
-        System.out.printf("S = a * b = %.2f * %.2f = %.2f%n",
-                rectangle.getA(), rectangle.getB(), rectangle.area());
-        history.add(String.format("Площадь (a=%.2f, b=%.2f): %.2f",
-                rectangle.getA(), rectangle.getB(), rectangle.area()));
-    }
-
-    private void showDiagonal() {
-        System.out.println("Диагональ:");
-        // Используем sqrt в тексте, чтобы было понятно, откуда формула
-        System.out.printf("d = sqrt(a^2 + b^2) = sqrt(%.2f^2 + %.2f^2) = %.2f%n",
-                rectangle.getA(), rectangle.getB(), rectangle.diagonal());
-        history.add(String.format("Диагональ (a=%.2f, b=%.2f): %.2f",
-                rectangle.getA(), rectangle.getB(), rectangle.diagonal()));
-    }
-
-    private void showCircumscribedCircle() {
-        System.out.println("Длина описанной окружности:");
-        // C = 2πR, где R = d/2, то есть C = π * d
-        double c = Math.PI * rectangle.diagonal();
-        System.out.printf("C = π * d = π * %.2f = %.2f%n",
-                rectangle.diagonal(), c);
-        history.add(String.format("Описанная окружность (a=%.2f, b=%.2f): %.2f",
-                rectangle.getA(), rectangle.getB(), c));
-    }
-
-    private void showInscribedCircle() {
-    	// только для квадрата, иначе — понятное сообщение
-    	System.out.println("Радиус вписанной окружности:");
-        if (!rectangle.isSquare()) {
-            System.out.println("Вписанная окружность существует только для квадрата.");
-            return; // Вышли из метода, пауза выполнится в run()
-        }
-        // Для квадрата: r = a / 2
-        double r = rectangle.inscribedCircleRadius();
-        System.out.printf("r = a / 2 = %.2f / 2 = %.2f%n", rectangle.getA(), r);
-        history.add(String.format("Вписанная окружность (a=%.2f, b=%.2f): %.2f",
-                rectangle.getA(), rectangle.getB(), r));
-    }
-    
-    
     /**
-     * Выводит справку по командам (аналог `man` / `--help` в Unix-утилитах).
+     * Периметр фигуры. Работает для любой фигуры (полиморфизм).
+     */
+    private void showPerimeter() {
+        double p = currentShape.perimeter();
+        System.out.printf("Периметр (%s): %.2f%n", currentShape.getName(), p);
+        history.add(String.format("Периметр (%s): %.2f", currentShape.getName(), p));
+    }
+
+    /**
+     * Площадь фигуры. Работает для любой фигуры (полиморфизм).
+     */
+    private void showArea() {
+        double s = currentShape.area();
+        System.out.printf("Площадь (%s): %.2f%n", currentShape.getName(), s);
+        history.add(String.format("Площадь (%s): %.2f", currentShape.getName(), s));
+    }
+
+    /**
+     * Диагональ — только для прямоугольника. Проверка instanceof — «ремень
+     * безопасности», если метод вызовут в обход меню.
+     */
+    private void showDiagonal() {
+        if (!(currentShape instanceof Rectangle r)) {
+            System.out.println("Диагональ доступна только для прямоугольника.");
+            return;
+        }
+        double d = r.diagonal();
+        System.out.printf("Диагональ: d = sqrt(%.2f^2 + %.2f^2) = %.2f%n",
+                r.getA(), r.getB(), d);
+        history.add(String.format("Диагональ (a=%.2f, b=%.2f): %.2f",
+                r.getA(), r.getB(), d));
+    }
+
+    /**
+     * Длина описанной окружности — только для прямоугольника.
+     */
+    private void showCircumscribedCircle() {
+        if (!(currentShape instanceof Rectangle r)) {
+            System.out.println("Описанная окружность доступна только для прямоугольника.");
+            return;
+        }
+        double c = Math.PI * r.diagonal();
+        System.out.printf("Длина описанной: C = π * d = π * %.2f = %.2f%n",
+                r.diagonal(), c);
+        history.add(String.format("Описанная окружность (a=%.2f, b=%.2f): %.2f",
+                r.getA(), r.getB(), c));
+    }
+
+    /**
+     * Радиус вписанной окружности — только для квадрата.
+     */
+    private void showInscribedCircle() {
+        if (!(currentShape instanceof Rectangle r)) {
+            System.out.println("Вписанная окружность доступна только для прямоугольника.");
+            return;
+        }
+        if (!r.isSquare()) {
+            System.out.println("Вписанная окружность существует только для квадрата.");
+            return;
+        }
+        double rad = r.inscribedCircleRadius();
+        System.out.printf("Радиус вписанной: r = a / 2 = %.2f / 2 = %.2f%n",
+                r.getA(), rad);
+        history.add(String.format("Вписанная (a=%.2f, b=%.2f): %.2f",
+                r.getA(), r.getB(), rad));
+    }
+
+    /**
+     * Справка по командам (аналог --help).
      */
     private void showHelp() {
         System.out.println("=== СПРАВКА ===");
-        System.out.println("Эта программа вычисляет характеристики прямоугольника.");
+        System.out.println("Программа вычисляет характеристики фигур.");
+        System.out.println("Доступные фигуры: прямоугольник, квадрат, круг, треугольник.");
         System.out.println();
         System.out.println("Основные операции:");
-        System.out.println("  1 — периметр (P = 2(a + b))");
-        System.out.println("  2 — площадь (S = a * b)");
-        System.out.println("  3 — диагональ (d = √(a² + b²))");
-        System.out.println("  4 — длина описанной окружности (C = π·d)");
-        System.out.println("  5 — радиус вписанной окружности (только для квадрата)");
-        System.out.println("  6 — ввести новые параметры a и b");
-        System.out.println("  7 — выйти из программы");
+        System.out.println("  1 — периметр");
+        System.out.println("  2 — площадь");
+        System.out.println("  3 — диагональ (только прямоугольник/квадрат)");
+        System.out.println("  4 — длина описанной окружности (только прямоугольник/квадрат)");
+        System.out.println("  5 — радиус вписанной окружности (только квадрат)");
+        System.out.println("  6 — ввести новые параметры / сменить фигуру");
+        System.out.println("  7 — выход");
         System.out.println();
         System.out.println("Дополнительные команды:");
-        System.out.println("  8  — показать историю вычислений");
+        System.out.println("  8  — история вычислений");
         System.out.println("  9  — эта справка");
-        System.out.println("  10 — информация о программе");
+        System.out.println("  10 — о программе");
         System.out.println("  11 — очистить экран");
-        System.out.println();
-        System.out.println("Совет: для расчёта квадрата введите a = b (например, 4 и 4).");
     }
-    
+
     /**
-     * Выводит информацию о программе: название, версия, автор, назначение.
-     * Аналог `--version` / `--about` в утилитах.
+     * Информация о программе (аналог --version / --about).
      */
     private void showAbout() {
         System.out.println("=== О ПРОГРАММЕ ===");
-        System.out.println("Название: Rectangle CLI Calculator");
-        System.out.println("Версия:   2.0 (с доп. заданиями)");
-        System.out.println("Автор:    Ковалева Варвара");
+        System.out.println("Название: Shape CLI Calculator");
+        System.out.println("Версия:   3.0 (полиморфизм + доп. задания)");
+        System.out.println("Автор:    [Твоё Имя]");
         System.out.println("Курс:     Java-разработка, учебный проект");
         System.out.println();
         System.out.println("Описание:");
-        System.out.println("  Консольный калькулятор для расчёта характеристик");
-        System.out.println("  прямоугольника. Поддерживает периметр, площадь,");
-        System.out.println("  диагональ, длины окружностей, историю вычислений.");
+        System.out.println("  Консольный калькулятор характеристик фигур.");
+        System.out.println("  Поддерживает прямоугольник, квадрат, круг, треугольник.");
+        System.out.println("  Реализован полиморфизм через интерфейс Shape.");
         System.out.println();
         System.out.println("Технологии: Java 17+, JUnit 5, Eclipse IDE.");
     }
-    
+
     /**
-     * Очищает экран консоли.
-     * Использует ANSI escape-коды: \033[H — курсор в начало, \033[2J — очистка.
+     * Очистка экрана через ANSI escape-последовательности.
+     * Работает в Eclipse Console, Linux, macOS, Windows Terminal.
      */
     private void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
-        // Дополнительно прокрутить: на случай, если ANSI не сработал
-        for (int i = 0; i < 5; i++) System.out.println();
     }
 }

@@ -3,60 +3,31 @@ package ru.oivt.rectanglecli.model;
 /**
  * Класс модели, хранящий параметры прямоугольника и вычисляющий его характеристики.
  */
-public class Rectangle {
-    private final double a; // длина
-    private final double b; // ширина
+public class Rectangle implements Shape {
+    private final double a;
+    private final double b;
 
     public Rectangle(double a, double b) {
         this.a = a;
         this.b = b;
     }
 
-    // Геттеры (чтобы UI мог выводить значения)
-    public double getA() {
-        return a;
-    }
+    public double getA() { return a; }
+    public double getB() { return b; }
 
-    public double getB() {
-        return b;
-    }
+    @Override
+    public String getName() { return "Прямоугольник"; }
 
-    /**
-     * Периметр: P = 2(a + b)
-     */
-    public double perimeter() {
-        return 2 * (a + b);
-    }
+    @Override
+    public double area() { return a * b; }
 
-    /**
-     * Площадь: S = a * b
-     */
-    public double area() {
-        return a * b;
-    }
+    @Override
+    public double perimeter() { return 2 * (a + b); }
 
-    /**
-     * Диагональ: d = sqrt(a^2 + b^2)
-     */
-    public double diagonal() {
-        return Math.sqrt(a * a + b * b);
-    }
-
-    /**
-     * Радиус вписанной окружности (только для квадрата): r = a / 2
-     */
+    public double diagonal() { return Math.sqrt(a * a + b * b); }
+    public boolean isSquare() { return Math.abs(a - b) < 1e-9; }
     public double inscribedCircleRadius() {
-        if (!isSquare()) {
-            throw new IllegalStateException("Вписанная окружность существует только для квадрата");
-        }
+        if (!isSquare()) throw new IllegalStateException("Не квадрат");
         return a / 2;
-    }
-
-    /**
-     * Проверка, является ли фигура квадратом (с учетом погрешности double)
-     */
-    public boolean isSquare() {
-        // Сравнивать double через == нельзя, используем допуск
-        return Math.abs(a - b) < 1e-9;
     }
 }
